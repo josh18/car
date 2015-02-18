@@ -14,38 +14,55 @@ function car(target) {
 	var speedyStart = {
 		x: 100,
 		y: 200,
-		direction: 315,
-		velocity: 0,
-		turning: 0
+		direction: 0
 	};
-	var speedy = new car(speedyStart.x, speedyStart.y, speedyStart.direction, speedyStart.velocity, speedyStart.turning);
+	var speedy = new car(speedyStart.x, speedyStart.y, speedyStart.direction);
 	
 	// ~~ Car Object
 	function car(x, y, direction, velocity, turning) {
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
-		this.velocity = velocity;
+		this.velocity = 0;
 		this.maxVelocity = 10;
 		this.acceleration = 0.5;
-		this.turning = turning;
+		this.deacceleration = 0.2;
+		this.turning = 0;
 	};
 	
 	car.prototype.draw = function () {
+		
 		context.beginPath();
-		context.arc(this.x, this.y, 5, 2 * Math.PI, false);
+		
+		context.translate(this.x, this.y);
+		context.rotate(-this.rad);
+		
+		context.rect(-15, -5, 30, 10);
 		context.fillStyle = "#000000";
 		context.fill();
+		
+		context.rotate(this.rad);
+		context.translate(-this.x, -this.y);
 	};
 	
 	car.prototype.update = function () {
 		
 		this.input();
 		
+		// Max velocity
+		if (this.velocity > this.maxVelocity) {
+			this.velocity = this.maxVelocity;
+		}
+		
+		// Min Velocity
+		if (this.velocity < 0) {
+			this.velocity = 0;
+		}
+		
 		this.direction = this.direction + this.turning;
-		var rad = this.direction * Math.PI / 180;
-		this.x += Math.cos(rad)*this.velocity;
-		this.y -= Math.sin(rad)*this.velocity;
+		this.rad = this.direction * Math.PI / 180;
+		this.x += Math.cos(this.rad)*this.velocity;
+		this.y -= Math.sin(this.rad)*this.velocity;
 	
 		/*// Bounce of left / right sides
 		if (this.x - 5 < 0) {
@@ -73,21 +90,16 @@ function car(target) {
 	};
 	
 	car.prototype.input = function () {
-		// Velocity
-		if (keys.up) {
-			var nextVelocity = this.velocity + this.acceleration;
-			if (nextVelocity < this.maxVelocity) {
-				this.velocity = nextVelocity;
-			} else {
-				this.velocity = this.maxVelocity;
-			}
+		
+		// Acceleration
+		if (keys.up && keys.down) {
+			
+		} else if (keys.up) {
+			this.velocity = this.velocity + this.acceleration;
+		} else if (keys.down) {
+			
 		} else {
-			var nextVelocity = this.velocity - this.acceleration;
-			if (nextVelocity > 0) {
-				this.velocity = nextVelocity;
-			} else {
-				this.velocity = 0;
-			}
+			this.velocity = this.velocity - this.deacceleration;
 		}
 		
 		// Direction
