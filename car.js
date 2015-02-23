@@ -24,9 +24,11 @@ function car(target) {
 		this.y = y;
 		this.direction = direction;
 		this.velocity = 0;
-		this.maxVelocity = 10;
-		this.acceleration = 0.5;
-		this.deacceleration = 0.2;
+		this.maxVelocity = 4;
+		this.acceleration = 0.2;
+		this.deacceleration = 0.05;
+		this.turningSpeed = 3;
+		
 		this.turning = 0;
 	};
 	
@@ -106,9 +108,9 @@ function car(target) {
 		if (keys.left && keys.right || !keys.left && !keys.right) {
 			this.turning = 0;
 		} else if (keys.left) {
-			this.turning = 10;
+			this.turning = this.turningSpeed;
 		} else if (keys.right) {
-			this.turning = -10;
+			this.turning = -this.turningSpeed;
 		}
 	}
 	
@@ -182,7 +184,7 @@ function car(target) {
 	function update() {
 		speedy.update();
 		
-		requestAnimationFrame(update, 10);
+		setTimeout(update, 10);
 	}
 	
 	// Render world
