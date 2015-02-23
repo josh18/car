@@ -193,7 +193,7 @@ function car(target) {
 		context.fillRect(0, 0, width, height); // Fill in canvas background
 		speedy.draw();
 		
-		requestAnimationFrame(render, 10);
+		requestAnimationFrame(render);
 	};
 	
 	// Inititate
