@@ -24,10 +24,10 @@ function car(target) {
 		this.y = y;
 		this.direction = direction;
 		this.velocity = 0;
-		this.maxVelocity = 4;
-		this.acceleration = 0.2;
-		this.deacceleration = 0.05;
-		this.turningSpeed = 3;
+		this.maxVelocity = 20;
+		this.acceleration = 5;
+		this.deacceleration = 5;
+		this.turningSpeed = 360;
 		
 		this.turning = 0;
 	};
@@ -47,9 +47,9 @@ function car(target) {
 		context.translate(-this.x, -this.y);
 	};
 	
-	car.prototype.update = function () {
+	car.prototype.update = function(dt) {
 		
-		this.input();
+		this.input(dt);
 		
 		// Max velocity
 		if (this.velocity > this.maxVelocity) {
@@ -65,53 +65,33 @@ function car(target) {
 		this.rad = this.direction * Math.PI / 180;
 		this.x += Math.cos(this.rad)*this.velocity;
 		this.y -= Math.sin(this.rad)*this.velocity;
-	
-		/*// Bounce of left / right sides
-		if (this.x - 5 < 0) {
-			this.x = 5;
-			this.x_speed = -this.x_speed;
-		} else if (this.x + 5 > width) {
-			this.x = width - 5;
-			this.x_speed = -this.x_speed;
-		}
-		
-		// Bounce of top
-		if (this.y - 5 < 0) {
-			this.y = 5;
-			this.y_speed = -this.y_speed;
-		}
-		
-		
-		// Reset if goes off edge
-		if (this.y > height) {
-			this.x = speedyStart.x;
-			this.y = speedyStart.y;
-			this.x_speed = speedyStart.x_speed;
-			this.y_speed = speedyStart.y_speed;
-		}*/
 	};
 	
-	car.prototype.input = function () {
+	car.prototype.input = function(dt) {
 		
 		// Acceleration
 		if (keys.up && keys.down) {
 			
 		} else if (keys.up) {
-			this.velocity = this.velocity + this.acceleration;
+			this.velocity = this.velocity + this.acceleration * dt;
 		} else if (keys.down) {
 			
 		} else {
-			this.velocity = this.velocity - this.deacceleration;
+			this.velocity = this.velocity - this.deacceleration * dt;
 		}
 		
 		// Direction
 		if (keys.left && keys.right || !keys.left && !keys.right) {
 			this.turning = 0;
 		} else if (keys.left) {
-			this.turning = this.turningSpeed;
+			this.turning = this.turningSpeed * dt;
 		} else if (keys.right) {
-			this.turning = -this.turningSpeed;
+			this.turning = -this.turningSpeed * dt;
 		}
+	}
+	
+	car.prototype.test = function() {
+		return this.x;
 	}
 	
 	// ~~ Input
@@ -181,10 +161,8 @@ function car(target) {
 	// ~~ Controllers
 	
 	// Update world
-	function update() {
-		speedy.update();
-		
-		setTimeout(update, 10);
+	function update(dt) {
+		speedy.update(dt);
 	}
 	
 	// Render world
@@ -192,13 +170,27 @@ function car(target) {
 		context.fillStyle = "#ccc"; // Canvas background color
 		context.fillRect(0, 0, width, height); // Fill in canvas background
 		speedy.draw();
+	}
+	
+	// Loop
+	var lastFrame = performance.now();
+	function loop(now) {
 		
-		requestAnimationFrame(render);
+		requestAnimationFrame(loop);
+		
+		// Calculate delta time
+		var dt = now - lastFrame;
+		
+		// Prevent dt spikes
+		if (dt < 160) {
+			update(dt / 1000);
+			render();
+		}
+		lastFrame = now;
 	};
 	
 	// Inititate
-	update();
-	render();
+	loop(performance.now());
 	
 	document.getElementById(target).appendChild(canvas);
 }
