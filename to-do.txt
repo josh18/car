@@ -1,3 +1,5 @@
 - Realistic turning / acceleration
-- Brake / reverse
 - Walls / obstacles
+- Handbrake
+- Graphics
+- Sounds

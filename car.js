@@ -18,18 +18,28 @@ function car(target) {
 	};
 	var speedy = new car(speedyStart.x, speedyStart.y, speedyStart.direction);
 	
-	// ~~ Car Object
+	// ~~ Car object
 	function car(x, y, direction, velocity, turning) {
+		
+		// Starting position
 		this.x = x;
 		this.y = y;
 		this.direction = direction;
 		this.velocity = 0;
-		this.maxVelocity = 20;
-		this.acceleration = 5;
-		this.deacceleration = 5;
-		this.turningSpeed = 360;
-		
 		this.turning = 0;
+		
+		// Forward movement
+		this.maxVelocity = 15;
+		this.acceleration = 4;
+		
+		// Reverse movement
+		this.reverseMaxVelocity = 5;
+		this.reverseAcceleration = 2;
+		
+		// Other movment
+		this.deacceleration = 10;
+		this.brakeRate = 15;
+		this.turningSpeed = 270;
 	};
 	
 	car.prototype.draw = function () {
@@ -56,9 +66,9 @@ function car(target) {
 			this.velocity = this.maxVelocity;
 		}
 		
-		// Min Velocity
-		if (this.velocity < 0) {
-			this.velocity = 0;
+		// Max reverse velocity
+		if (this.velocity < -this.reverseMaxVelocity) {
+			this.velocity = -this.reverseMaxVelocity;
 		}
 		
 		this.direction = this.direction + this.turning;
@@ -69,15 +79,31 @@ function car(target) {
 	
 	car.prototype.input = function(dt) {
 		
-		// Acceleration
-		if (keys.up && keys.down) {
-			
-		} else if (keys.up) {
+		// Brake
+		if (keys.up && keys.down || keys.down && this.velocity > 0) {
+			this.velocity = this.velocity - this.brakeRate * dt;
+		}
+		// Reverse
+		else if (keys.down && this.velocity <= 0) {
+			this.velocity = this.velocity - this.reverseAcceleration * dt;
+		}
+		// Accelerate
+		else if (keys.up) {
 			this.velocity = this.velocity + this.acceleration * dt;
-		} else if (keys.down) {
-			
-		} else {
+		}
+		// Deaccelerate
+		else if (this.velocity > 0) {
 			this.velocity = this.velocity - this.deacceleration * dt;
+			if (this.velocity < 0) {
+				this.velocity = 0;
+			}
+		}
+		// Deaccelerate
+		else if (this.velocity < 0) {
+			this.velocity = this.velocity + this.deacceleration * dt;
+			if (this.velocity > 0) {
+				this.velocity = 0;
+			}
 		}
 		
 		// Direction
