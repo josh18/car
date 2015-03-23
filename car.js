@@ -3,7 +3,7 @@ function car(target) {
     // ~~ Variables
     
     // Canvas
-    var canvas = document.createElement("canvas");
+    var canvas = document.createElement('canvas');
     var width = 800;
     var height = 800;
     canvas.width = width;
@@ -16,11 +16,13 @@ function car(target) {
         y: 200,
         direction: 0
     };
-    var speedy = new car(speedyStart.x, speedyStart.y, speedyStart.direction);
+
+    // Errors
+    var error = false;
     
     // ~~ Car object
     function car(x, y, direction, velocity, turning) {
-        
+
         // Starting position
         this.x = x;
         this.y = y;
@@ -29,7 +31,7 @@ function car(target) {
         this.turning = 0;
         
         // Forward movement
-        this.maxVelocity = 15;
+        this.maxVelocity = 12;
         this.acceleration = 4;
         
         // Reverse movement
@@ -38,19 +40,19 @@ function car(target) {
         
         // Other movement
         this.deceleration = 5;
-        this.brakeRate = 15;
+        this.brakeRate = 12;
         this.turnSpeed = 180;
     };
     
     car.prototype.draw = function () {
-        
+
         context.beginPath();
         
         context.translate(this.x, this.y);
         context.rotate(-this.rad);
         
         context.rect(-7.5, -5, 30, 10);
-        context.fillStyle = "#000000";
+        context.fillStyle = '#000';
         context.fill();
         
         context.rotate(this.rad);
@@ -58,11 +60,11 @@ function car(target) {
     };
     
     car.prototype.update = function(dt) {
-        
+
         function turnSpeed(velocity) {
             var maxTurnSpeed = 180,
-                optimalVelocity = 3,
-                adjustedVelocity = velocity / (optimalVelocity / 2);
+            optimalVelocity = 3,
+            adjustedVelocity = velocity / (optimalVelocity / 2);
             
             if (velocity < (optimalVelocity / 2)) {
                 return maxTurnSpeed / 2 * adjustedVelocity * adjustedVelocity;
@@ -94,7 +96,7 @@ function car(target) {
     };
     
     car.prototype.input = function(dt) {
-        
+
         // Brake
         if (keys.up && keys.down || keys.down && this.velocity > 0) {
             this.velocity = this.velocity - this.brakeRate * dt;
@@ -131,9 +133,32 @@ function car(target) {
             this.turning = -1 * dt;
         }
     }
-    
-    car.prototype.test = function() {
-        return this.x;
+
+    // ~~ Controllers
+
+    function drawObstacle(x, y, width, height, rotation, shape, color) {
+
+        // Convert degress to radians
+        rotation = rotation * Math.PI / 180;
+
+        context.beginPath();
+        
+        context.translate(x, y);
+        context.rotate(rotation);
+        
+        if (shape === 'square') {
+            context.rect(-width / 2, -height / 2, width, height);
+        } else {
+            console.log('Error: Unknown obstacle shape');
+            error = true;
+        }
+
+        // Fill colour
+        context.fillStyle = color;
+        context.fill();
+        
+        context.rotate(-rotation);
+        context.translate(-x, -y);
     }
     
     // ~~ Input
@@ -142,34 +167,34 @@ function car(target) {
     var keys = new keyDetect();
     
     function keyDetect() {
-        
-        this.keyList = [
-     {
-        key: 'up',
-        code: 38
-    },
-    {
-        key: 'right',
-        code: 39
-    },
-    {
-        key: 'down',
-        code: 40
-    },
-    {
-        key: 'left',
-        code: 37
-    },
-    {
-        key: 'space',
-        code: 32
-    }
-    ];
 
-    for (var i = 0; i < this.keyList.length; i++) {
-     this[this.keyList[i]['key']] = false;
- }
-};
+        this.keyList = [
+        {
+            key: 'up',
+            code: 38
+        },
+        {
+            key: 'right',
+            code: 39
+        },
+        {
+            key: 'down',
+            code: 40
+        },
+        {
+            key: 'left',
+            code: 37
+        },
+        {
+            key: 'space',
+            code: 32
+        }
+        ];
+
+        for (var i = 0; i < this.keyList.length; i++) {
+           this[this.keyList[i]['key']] = false;
+       }
+   };
 
 
     // Key down state
@@ -199,8 +224,18 @@ function car(target) {
     window.onkeyup = function(e) {
         keys.keyUp(e);
     }
+
+    // ~~ Initiators
+
+    // Create speedy the car
+    var speedy = new car(speedyStart.x, speedyStart.y, speedyStart.direction);
+
+    // Obstacles list
+    function generateObstacles() {
+        drawObstacle(400, 400, 50, 50, 45, 'square', '#f00');
+    }
     
-    // ~~ Controllers
+    // ~~ World
     
     // Update world
     function update(dt) {
@@ -209,22 +244,23 @@ function car(target) {
     
     // Render world
     function render() {
-        context.fillStyle = "#ccc"; // Canvas background color
+        context.fillStyle = '#ccc'; // Canvas background color
         context.fillRect(0, 0, width, height); // Fill in canvas background
-        speedy.draw();
+        generateObstacles(); // Draw the obstacles
+        speedy.draw(); // Draw the car
     }
     
     // Loop
     var lastFrame = performance.now();
     function loop(now) {
-        
+
         requestAnimationFrame(loop);
         
         // Calculate delta time
         var dt = now - lastFrame;
         
         // Prevent dt spikes
-        if (dt < 160) {
+        if (dt < 160 && !error) {
             update(dt / 1000);
             render();
         }
