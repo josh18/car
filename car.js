@@ -57,6 +57,10 @@ function car(target) {
         
         context.rotate(this.rad);
         context.translate(-this.x, -this.y);
+
+        context.closePath();
+
+        this.test();
     };
     
     car.prototype.update = function(dt) {
@@ -134,6 +138,18 @@ function car(target) {
         }
     }
 
+    car.prototype.test = function() {
+        var originalX = this.x - 7.5,
+            originalY = this.y - 5;
+        x = originalX * Math.cos(this.rad) - originalY * Math.sin(-this.rad);
+        y = originalX * Math.sin(this.rad) + originalY * Math.cos(this.rad);
+        context.beginPath();
+        context.rect(originalX, y, 15, 15);
+        context.fillStyle = '#f00';
+        context.fill();
+        context.closePath();
+    }
+
     // ~~ Controllers
 
     function drawObstacle(x, y, width, height, rotation, shape, color) {
@@ -159,6 +175,8 @@ function car(target) {
         
         context.rotate(-rotation);
         context.translate(-x, -y);
+
+        context.closePath();
     }
     
     // ~~ Input
